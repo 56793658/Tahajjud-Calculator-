@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tahajjud Calculator</title>
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%232d4a3e'/><text y='.9em' x='0.1em' font-size='70' fill='white'>🌙</text></svg>">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Tahajjud%20Calculator%22,%22short_name%22:%22Tahajjud%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8f4ee%22,%22theme_color%22:%22%232d4a3e%22}">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:italic,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8f4ee; --card: #ffffff; --text-p: #2d2d2d; --text-s: #757575; --accent: #2d4a3e; --shadow: rgba(0,0,0,0.05);
+            --gradient: radial-gradient(at 0% 0%, #fdf8ef 0, transparent 50%), radial-gradient(at 100% 100%, #e9f0ec 0, transparent 50%);
+        }
+        [data-theme='dark'] {
+            --bg: #121212; --card: #1e1e1e; --text-p: #e0e0e0; --text-s: #a0a0a0; --accent: #8fb3a4; --shadow: rgba(0,0,0,0.3);
+            --gradient: radial-gradient(at 0% 0%, #1a1a1a 0, transparent 50%), radial-gradient(at 100% 100%, #0d1a14 0, transparent 50%);
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); background-image: var(--gradient); color: var(--text-p); margin: 0; display: flex; justify-content: center; min-height: 100vh; padding-bottom: 50px; transition: background 0.4s ease; }
+        .app-container { width: 100%; max-width: 420px; padding: 40px 20px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 0; }
+        .theme-toggle { background: var(--card); border: none; padding: 10px; border-radius: 50%; cursor: pointer; box-shadow: 0 4px 10px var(--shadow); font-size: 1.2rem; }
+
+        .countdown-container { background: var(--accent); color: white; padding: 20px; border-radius: 24px; text-align: center; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .timer-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+        .timer-val { font-size: 2.2rem; font-weight: 700; margin: 5px 0; font-variant-numeric: tabular-nums; letter-spacing: 1px; }
+
+        .input-section { background: var(--card); padding: 24px; border-radius: 28px; box-shadow: 0 10px 30px var(--shadow); margin-bottom: 25px; }
+        .input-grid { display: flex; gap: 15px; margin-bottom: 15px; }
+        label { display: block; font-size: 0.7rem; letter-spacing: 1px; font-weight: 600; color: var(--text-s); margin-bottom: 8px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); background: var(--bg); color: var(--text-p); font-size: 1rem; box-sizing: border-box; }
+        .calc-btn { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 18px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+
+        .result-card { background: var(--card); padding: 20px; border-radius: 24px; margin-bottom: 12px; box-shadow: 0 4px 12px var(--shadow); display: flex; justify-content: space-between; align-items: center; border: 2.5px solid transparent; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .active-card { border-color: var(--accent); transform: translateY(-3px); box-shadow: 0 12px 24px var(--shadow); }
+        
+        .card-title { font-size: 0.85rem; color: var(--text-s); margin-bottom: 4px; display: block; font-weight: 600; }
+        .card-time { font-size: 1.1rem; font-weight: 700; }
+        .card-sub { font-size: 0.72rem; font-style: italic; color: var(--text-s); margin-top: 6px; display: block; font-family: 'Playfair Display', serif; line-height: 1.3; }
+
+        .fasting-container { margin-top: 30px; }
+        .days-list { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+        .day-chip { padding: 12px 0; border-radius: 12px; background: var(--card); font-size: 0.75rem; text-align: center; box-shadow: 0 2px 5px var(--shadow); font-weight: 600; color: var(--text-s); }
+        .fast-day { background: var(--accent); color: white; transform: scale(1.05); }
+
+        .hadith-box { margin-top: 50px; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 30px; }
+        .hadith-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.15rem; line-height: 1.6; color: var(--text-p); }
+        .hadith-ref { display: block; margin-top: 12px; font-size: 0.75rem; color: var(--text-s); text-transform: uppercase; letter-spacing: 2px; }
+        
+        .install-guide { margin-top: 40px; text-align: center; font-size: 0.8rem; color: var(--text-s); opacity: 0.7; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <h1>Tahajjud Calculator</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+    </header>
+
+    <div class="countdown-container">
+        <div class="timer-label" id="timer-status">Waiting for input</div>
+        <div class="timer-val" id="countdown">00:00:00</div>
+    </div>
+
+    <div class="input-section">
+        <div class="input-grid">
+            <div class="input-box" style="flex:1;"><label>Maghrib</label><input type="time" id="mag" value="18:52"></div>
+            <div class="input-box" style="flex:1;"><label>Fajr</label><input type="time" id="faj" value="04:35"></div>
+        </div>
+        <div class="input-box" style="margin-bottom:10px;">
+            <label>Start Fast of Dawood (AS) On</label>
+            <select id="startDay" onchange="update()"><option value="0">Sunday</option><option value="1" selected>Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option></select>
+        </div>
+        <button class="calc-btn" onclick="update()">Calculate</button>
+    </div>
+
+    <div id="results" style="display:none;">
+        <div class="result-card" id="card-1"><div class="card-info"><span class="card-title">Islamic Midnight</span><span id="c1" class="card-time">--</span><span class="card-sub">The transition into the most blessed hours of the night.</span></div><span>🌑</span></div>
+        <div class="result-card" id="card-2"><div class="card-info"><span class="card-title">Last 1/3 (Tahajjud, Quran & Dua)</span><span id="c2" class="card-time">--</span><span class="card-sub">Allah descends to the lowest heaven. Ask.</span></div><span>✨</span></div>
+        <div class="result-card" id="card-3"><div class="card-info"><span class="card-title">Sunnah 1/6 (Rest)</span><span id="c3" class="card-time">--</span><span class="card-sub">Rest to refresh the body for Fajr, following Dawood (AS).</span></div><span>🛌</span></div>
+        <div class="result-card" id="card-4"><div class="card-info"><span class="card-title">Istighfar (Suhoor)</span><span id="c4" class="card-time">--</span><span class="card-sub">And those who seek forgiveness before dawn. (Quran 3:17)</span></div><span>📿</span></div>
+
+        <div class="fasting-container"><label>Fast of Dawood (AS) Cycle</label><div class="days-list" id="days-list"></div></div>
+    </div>
+
+    <div class="hadith-box">
+        <p class="hadith-text">"The most beloved prayer to Allah is that of Dawood (AS)... He used to sleep half the night, stand in prayer for one-third of it, and sleep for a sixth of it."</p>
+        <span class="hadith-ref">— Sahih Bukhari 1131</span>
+    </div>
+
+    <div class="install-guide">
+        <span>To install: Tap Share then "Add to Home Screen"</span>
+    </div>
+</div>
+
+<script>
+    let schedule = { mid: null, l3: null, l6: null, ist: null, faj: null };
+
+    function toggleTheme() {
+        const body = document.documentElement;
+        body.getAttribute('data-theme') === 'dark' ? body.removeAttribute('data-theme') : body.setAttribute('data-theme', 'dark');
+    }
+
+    function getTimeAsDate(timeStr, isNextDay) {
+        const [h, m] = timeStr.split(':').map(Number);
+        const d = new Date();
+        d.setHours(h, m, 0, 0);
+        if (isNextDay) d.setDate(d.getDate() + 1);
+        return d;
+    }
+
+    function update() {
+        const magVal = document.getElementById('mag').value;
+        const fajVal = document.getElementById('faj').value;
+        const start = getTimeAsDate(magVal, false);
+        let end = getTimeAsDate(fajVal, false);
+        if (end <= start) end = getTimeAsDate(fajVal, true);
+        const totalMs = end - start;
+        
+        schedule.mid = new Date(start.getTime() + totalMs * 0.5);
+        schedule.l3 = new Date(start.getTime() + totalMs * 0.666);
+        schedule.l6 = new Date(start.getTime() + totalMs * 0.833);
+        schedule.ist = new Date(end.getTime() - (10 * 60 * 1000));
+        schedule.faj = end;
+
+        document.getElementById('c1').innerText = format(schedule.mid);
+        document.getElementById('c2').innerText = format(schedule.l3) + " — " + format(schedule.l6);
+        document.getElementById('c3').innerText = format(schedule.l6) + " — " + format(schedule.ist);
+        document.getElementById('c4').innerText = format(schedule.ist) + " — " + format(schedule.faj);
+        
+        renderFasting();
+        document.getElementById('results').style.display = 'block';
+    }
+
+    function renderFasting() {
+        const startDay = parseInt(document.getElementById('startDay').value);
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        let html = '';
+        days.forEach((day, i) => {
+            const isFast = (i >= startDay && (i - startDay) % 2 === 0) || (i < startDay && (7 - (startDay - i)) % 2 === 0);
+            html += `<div class="day-chip ${isFast ? 'fast-day' : ''}">${day}</div>`;
+        });
+        document.getElementById('days-list').innerHTML = html;
+    }
+
+    setInterval(() => {
+        if (!schedule.faj) return;
+        const now = new Date();
+        let target, status, activeId;
+
+        for(let i=1; i<=4; i++) document.getElementById('card-'+i).classList.remove('active-card');
+
+        if (now < schedule.mid) { target = schedule.mid; status = "Midnight In"; }
+        else if (now < schedule.l3) { target = schedule.l3; status = "Power Hour In"; activeId = 1; }
+        else if (now < schedule.l6) { target = schedule.l6; status = "Power Hour Ends In"; activeId = 2; }
+        else if (now < schedule.ist) { target = schedule.ist; status = "Rest Ends In"; activeId = 3; }
+        else if (now < schedule.faj) { target = schedule.faj; status = "Suhoor Ends In"; activeId = 4; }
+        else { status = "Fajr Started"; document.getElementById('countdown').innerText = "00:00:00"; return; }
+
+        if (activeId) document.getElementById('card-'+activeId).classList.add('active-card');
+        
+        const diff = target - now;
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+
+        document.getElementById('timer-status').innerText = status;
+        document.getElementById('countdown').innerText = 
+            `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }, 1000);
+
+    function format(date) {
+        return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    }
+</script>
+</body>
+</html>
